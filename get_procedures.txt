@@ -1,0 +1,35 @@
+DELIMITER $$
+
+CREATE PROCEDURE sp_GetProducts (
+    IN p_CategoryID INT DEFAULT NULL,
+    IN p_Name VARCHAR(255) DEFAULT NULL,
+    IN p_PageSize INT DEFAULT 20,
+    IN p_PageNumber INT DEFAULT 1,
+    IN p_SortColumn VARCHAR(128) DEFAULT 'id', -- Доступні значення: 'id', 'name', 'price'
+    IN p_SortDirection ENUM('ASC', 'DESC') DEFAULT 'ASC' -- Сортування: ASC або DESC
+)
+BEGIN
+    -- Перевірка на коректність стовпця для сортування
+    IF p_SortColumn NOT IN ('id', 'name', 'price', 'quantity') THEN
+        SET p_SortColumn = 'id'; -- За замовчуванням сортування по id
+    END IF;
+
+    -- Обчислення OFFSET для пагінації
+    SET @Offset = (p_PageNumber - 1) * p_PageSize;
+
+    -- Формування динамічного SQL для вибірки
+    SET @Query = CONCAT(
+        'SELECT * FROM Products ',
+        'WHERE (category_id = ', IFNULL(p_CategoryID, 'category_id'), ') ',
+        'AND (name LIKE ', IF(p_Name IS NOT NULL, CONCAT('\'', p_Name, '%\''), '\'%\''), ') ',
+        'ORDER BY ', p_SortColumn, ' ', p_SortDirection, ' ',
+        'LIMIT ', p_PageSize, ' OFFSET ', @Offset
+    );
+
+    -- Виконання запиту
+    PREPARE stmt FROM @Query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+END$$
+
+DELIMITER ;

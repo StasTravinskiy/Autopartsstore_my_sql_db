@@ -1,0 +1,81 @@
+INSERT INTO Categories (name, description) VALUES
+('Двигун', 'Запчастини для двигунів та аксесуари'),
+('Гальмівна система', 'Колодки, диски, рідини для гальм'),
+('Електроніка', 'Лампи, акумулятори, сенсори'),
+('Підвіска', 'Амортизатори, ресори, важелі'),
+('Кузов', 'Деталі зовнішнього та внутрішнього кузова автомобіля');
+
+INSERT INTO Products (category_id, name, price, quantity, manufacturer) VALUES
+(1, 'Двигун V6', 3500.00, 10, 'Ford'),
+(1, 'Двигун V8', 5000.00, 5, 'Toyota'),
+(2, 'Гальмівний диск', 100.00, 50, 'Bosch'),
+(2, 'Гальмівна рідина DOT-4', 12.50, 200, 'Liqui Moly'),
+(3, 'Акумулятор 12В 75Ah', 180.00, 30, 'Varta'),
+(4, 'Амортизатор передній', 95.00, 25, 'Monroe'),
+(5, 'Капот передній', 450.00, 10, 'BMW Original');
+
+INSERT INTO Suppliers (name, contact_info) VALUES
+('АвтоПостач', 'Телефон: +380501234567, Email: info@autopostach.com'),
+('ЗапчастиниPro', 'Телефон: +380678901234, Email: contact@zapchastinypro.com'),
+('CarParts UA', 'Телефон: +380931234567, Email: sales@carpartsua.com');
+
+INSERT INTO Orders (customer_name, order_date, total_price, status) VALUES
+('Іван Іванов', '2024-12-01', 5650.00, 'Completed'),
+('Петро Петренко', '2024-12-05', 180.00, 'Pending'),
+('Оксана Оксанова', '2024-12-10', 190.00, 'Cancelled');
+
+INSERT INTO OrderDetails (order_id, product_id, quantity, price) VALUES
+(1, 1, 1, 3500.00),
+(1, 3, 1, 180.00),
+(2, 4, 10, 125.00),
+(3, 5, 1, 180.00);
+
+INSERT INTO Customers (name, phone, email, address) VALUES
+('Іван Іванов', '+380501234567', 'ivanov@test.com', 'м. Київ, вул. Хрещатик, 10'),
+('Петро Петренко', '+380678901234', 'petrenko@test.com', 'м. Львів, вул. Шевченка, 15'),
+('Оксана Оксанова', '+380931234567', 'oksanova@test.com', 'м. Одеса, вул. Дерибасівська, 5');
+
+INSERT INTO Discounts (product_id, discount_percentage, start_date, end_date) VALUES
+(1, 10.00, '2024-12-01', '2024-12-31'),
+(3, 5.00, '2024-12-05', '2024-12-20');
+
+INSERT INTO Inventory (product_id, quantity) VALUES
+(1, 10),
+(2, 50),
+(3, 30),
+(4, 25),
+(5, 10);
+
+INSERT INTO Shipments (supplier_id, shipment_date, total_cost) VALUES
+(1, '2024-12-01', 12000.00),
+(2, '2024-12-05', 4500.00),
+(3, '2024-12-10', 3500.00);
+
+INSERT INTO ShipmentDetails (shipment_id, product_id, quantity, cost) VALUES
+(1, 1, 10, 7000.00),
+(2, 2, 50, 5000.00),
+(3, 3, 30, 5400.00);
+
+INSERT INTO Payments (order_id, payment_date, amount, payment_method) VALUES
+(1, '2024-12-02', 5650.00, 'Card'),
+(2, '2024-12-06', 180.00, 'Cash');
+
+INSERT INTO Reviews (customer_id, product_id, rating, review_text) VALUES
+(1, 1, 5, 'Відмінний двигун, працює чудово.'),
+(2, 3, 4, 'Акумулятор гарний, але трохи дорогуватий.'),
+(3, 4, 3, 'Амортизатор звичайний, якість середня.');
+
+INSERT INTO Employees (name, position, salary, hire_date) VALUES
+('Олег Коваленко', 'Менеджер', 15000.00, '2020-01-15'),
+('Марія Василенко', 'Бухгалтер', 12000.00, '2019-05-20'),
+('Віктор Бойко', 'Кладовщик', 10000.00, '2021-08-01');
+
+INSERT INTO Roles (name) VALUES
+('Менеджер'),
+('Бухгалтер'),
+('Кладовщик');
+
+INSERT INTO EmployeeRoles (employee_id, role_id) VALUES
+(1, 1),
+(2, 2),
+(3, 3);

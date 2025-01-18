@@ -1,0 +1,83 @@
+DROP PROCEDURE IF EXISTS sp_CreateOrder;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_CreateOrder (
+    IN p_customer_name VARCHAR(255),
+    IN p_order_details JSON
+)
+BEGIN
+    DECLARE v_order_id INT;
+    DECLARE v_product_id INT;
+    DECLARE v_quantity INT;
+    DECLARE v_price DECIMAL(10, 2);
+    DECLARE v_stock INT;
+    DECLARE v_error_message VARCHAR(255);
+
+    -- Обробка помилок
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- Відкат транзакції
+        ROLLBACK;
+
+        -- Встановити статичне повідомлення про помилку
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'An unexpected error occurred during the creation of the order.';
+    END;
+
+    -- Початок транзакції
+    START TRANSACTION;
+
+    -- Додавання запису в таблицю Orders
+    INSERT INTO Orders (customer_name, order_date, total_price, status)
+    VALUES (p_customer_name, CURDATE(), 0, 'Pending');
+
+    -- Отримання ID нового замовлення
+    SET v_order_id = LAST_INSERT_ID();
+
+    -- Цикл по деталях замовлення
+    WHILE JSON_LENGTH(p_order_details) > 0 DO
+        -- Отримати дані з JSON
+        SET v_product_id = JSON_UNQUOTE(JSON_EXTRACT(p_order_details, '$[0].product_id'));
+        SET v_quantity = JSON_UNQUOTE(JSON_EXTRACT(p_order_details, '$[0].quantity'));
+        SET v_price = JSON_UNQUOTE(JSON_EXTRACT(p_order_details, '$[0].price'));
+
+        -- Перевірка наявності товару
+        SELECT quantity INTO v_stock FROM Products WHERE id = v_product_id;
+        IF v_stock < v_quantity THEN
+            SET v_error_message = CONCAT('Insufficient stock for product ID ', v_product_id);
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_error_message;
+        END IF;
+
+        -- Додавання запису в таблицю OrderDetails
+        INSERT INTO OrderDetails (order_id, product_id, quantity, price)
+        VALUES (v_order_id, v_product_id, v_quantity, v_price);
+
+        -- Оновлення кількості товару
+        UPDATE Products SET quantity = quantity - v_quantity WHERE id = v_product_id;
+
+        -- Видалення обробленого запису з JSON
+        SET p_order_details = JSON_REMOVE(p_order_details, '$[0]');
+    END WHILE;
+
+    -- Оновлення загальної ціни замовлення
+    UPDATE Orders
+    SET total_price = (SELECT SUM(quantity * price) FROM OrderDetails WHERE order_id = v_order_id)
+    WHERE id = v_order_id;
+
+    -- Завершення транзакції
+    COMMIT;
+END$$
+
+DELIMITER ;
+
+SHOW PROCEDURE STATUS WHERE Db = 'AutoParts';
+
+DROP PROCEDURE IF EXISTS sp_CreateOrder;
+CREATE PROCEDURE sp_CreateOrder (
+    IN p_customer_name VARCHAR(255),
+    IN p_order_details JSON
+)
+BEGIN
+    -- Код процедури
+END;
+

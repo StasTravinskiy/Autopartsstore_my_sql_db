@@ -1,0 +1,83 @@
+CREATE VIEW View_ProductsWithCategories AS
+SELECT 
+    p.id AS ProductID,
+    p.name AS ProductName,
+    p.price AS Price,
+    p.quantity AS StockQuantity,
+    p.manufacturer AS Manufacturer,
+    c.name AS CategoryName,
+    c.description AS CategoryDescription
+FROM 
+    Products p
+JOIN 
+    Categories c ON p.category_id = c.id;
+
+CREATE VIEW View_OrderDetails AS
+SELECT 
+    o.id AS OrderID,
+    o.customer_name AS CustomerName,
+    o.order_date AS OrderDate,
+    od.product_id AS ProductID,
+    p.name AS ProductName,
+    od.quantity AS Quantity,
+    od.price AS UnitPrice,
+    (od.quantity * od.price) AS TotalPrice
+FROM 
+    Orders o
+JOIN 
+    OrderDetails od ON o.id = od.order_id
+JOIN 
+    Products p ON od.product_id = p.id;
+
+CREATE VIEW View_PopularProducts AS
+SELECT 
+    p.id AS ProductID,
+    p.name AS ProductName,
+    SUM(od.quantity) AS TotalSold,
+    COUNT(od.id) AS OrderCount
+FROM 
+    Products p
+LEFT JOIN 
+    OrderDetails od ON p.id = od.product_id
+GROUP BY 
+    p.id, p.name
+ORDER BY 
+    TotalSold DESC;
+
+CREATE VIEW View_ShipmentsReport AS
+SELECT 
+    sh.id AS ShipmentID,
+    s.name AS SupplierName,
+    p.name AS ProductName,
+    sd.quantity AS Quantity,
+    sd.cost AS UnitCost,
+    (sd.quantity * sd.cost) AS TotalCost,
+    sh.shipment_date AS ShipmentDate
+FROM 
+    Shipments sh
+JOIN 
+    Suppliers s ON sh.supplier_id = s.id
+JOIN 
+    ShipmentDetails sd ON sh.id = sd.shipment_id
+JOIN 
+    Products p ON sd.product_id = p.id;
+
+CREATE VIEW View_OrderRevenue AS
+SELECT 
+    o.id AS OrderID,
+    o.customer_name AS CustomerName,
+    SUM(od.quantity * od.price) AS TotalOrderRevenue
+FROM 
+    Orders o
+JOIN 
+    OrderDetails od ON o.id = od.order_id
+GROUP BY 
+    o.id, o.customer_name;
+
+USE AutoParts;
+SELECT * FROM View_ProductsWithCategories WHERE StockQuantity > 10;
+SELECT * FROM View_OrderDetails WHERE OrderDate >= '2024-12-01';
+SELECT * FROM View_ShipmentsReport WHERE SupplierName = 'АвтоПостач';
+SELECT * FROM View_OrderRevenue WHERE TotalOrderRevenue > 500;
+SHOW FULL TABLES WHERE TABLE_TYPE = 'VIEW';
+

@@ -1,0 +1,29 @@
+CREATE TABLE Categories_Historyy (
+    id INT NOT NULL,
+    name VARCHAR(255),
+    description TEXT,
+    operation_type ENUM('INSERT', 'UPDATE', 'DELETE'),
+    operation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TRIGGER trg_Categories_INSERT
+AFTER INSERT ON Categories
+FOR EACH ROW
+INSERT INTO Categories_History (id, name, description, operation_type)
+VALUES (NEW.id, NEW.name, NEW.description, 'INSERT');
+
+CREATE TRIGGER trg_Categories_UPDATE
+AFTER UPDATE ON Categories
+FOR EACH ROW
+INSERT INTO Categories_History (id, name, description, operation_type)
+VALUES (NEW.id, NEW.name, NEW.description, 'UPDATE');
+
+CREATE TRIGGER trg_Categories_DELETE
+AFTER DELETE ON Categories
+FOR EACH ROW
+INSERT INTO Categories_History (id, name, description, operation_type)
+VALUES (OLD.id, OLD.name, OLD.description, 'DELETE');
+
+INSERT INTO Categories (name, description) VALUES ('Двигуни', 'Категорія для двигунів');
+UPDATE Categories SET description = 'Оновлений опис категорії' WHERE id = 1;
+SELECT * FROM Categories_History;
